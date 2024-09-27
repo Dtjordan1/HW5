@@ -60,7 +60,7 @@ checksum_loop:
     addi t1, t1, 1       # Move to next digit in input_buffer
     addi t2, t2, 4       # Move to next weight
     addi t4, t4, 1       # Increment index
-    j checksum_loop      # Repeat for all 9 digits
+    b checksum_loop      # Repeat for all 9 digits
 
 check_done:
     # Check if the sum is divisible by 11
@@ -69,7 +69,7 @@ check_done:
     beqz t1, valid_tfn       # If remainder is 0, the TFN is valid
 
     # If invalid, jump to invalid_tfn
-    j invalid_tfn
+    b invalid_tfn
 
 invalid_tfn:
     la a0, invalid_msg       # Load invalid TFN message
