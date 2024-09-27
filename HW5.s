@@ -67,27 +67,25 @@ check_done:
     addi t0, zero, 11        # Divisor
     rem t1, t3, t0           # t1 = t3 % 11
     beqz t1, valid_tfn       # If remainder is 0, the TFN is valid
-
-    # If invalid, jump to invalid_tfn
-    b invalid_tfn
+    b invalid_tfn            # Branch to invalid_tfn if invalid
 
 invalid_tfn:
     la a0, invalid_msg       # Load invalid TFN message
     addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end                    # Jump to end
+    b end                    # Branch to end
 
 valid_tfn:
     la a0, valid_msg         # Load valid TFN message
     addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end                    # Jump to end
+    b end                    # Branch to end
 
 format_incorrect:
     la a0, format_error      # Load format error message
     addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end                    # Jump to end
+    b end                    # Branch to end
 
 end:
     addi a7, zero, 10        # Syscall for exit (syscall 10)
