@@ -1,8 +1,8 @@
 .data
-    tfn_prompt:    .ascii "Enter the TFN to check: \0"
-    valid_msg:     .ascii "Hooray! The TFN is valid!\n\0"
-    invalid_msg:   .ascii "Invalid TFN: Checksum Failed\n\0"
-    format_error:  .ascii "Invalid TFN: Format Incorrect\n\0"
+    tfn_prompt:    .asciz "Enter the TFN to check: \0"
+    valid_msg:     .asciz "Hooray! The TFN is valid!\n\0"
+    invalid_msg:   .asciz "Invalid TFN: Checksum Failed\n\0"
+    format_error:  .asciz "Invalid TFN: Format Incorrect\n\0"
     
     input_buffer:  .space 12   # To store up to 9 digits + newline + null terminator
     weights:       .word 1, 4, 3, 7, 5, 8, 6, 9, 10  # Weights for each TFN digit
@@ -11,43 +11,43 @@
     .globl main
 main:
     # Prompt user for input
-    la a0, tfn_prompt  # Load the prompt message
-    li a7, 4           # syscall to print string
+    la a0, tfn_prompt      # Load the prompt message
+    addi a7, zero, 4       # Syscall for print string (syscall 4)
     ecall
 
     # Get input from the user
-    li a7, 8           # syscall to read string
-    la a0, input_buffer
-    li a1, 11          # Read up to 11 chars (9 digits + newline + null terminator)
+    la a0, input_buffer    # Store input in input_buffer
+    addi a1, zero, 12      # Buffer size to capture input (12 bytes)
+    addi a7, zero, 8       # Syscall to read string (syscall 8)
     ecall
 
     # Check if the input is exactly 9 digits (excluding newline)
-    li t0, 9            # t0 = expected length (9 digits)
-    la t1, input_buffer
-    li t2, 0            # counter for the number of digits
+    addi t0, zero, 9       # t0 = expected length (9 digits)
+    la t1, input_buffer    # Point t1 to input_buffer
+    addi t2, zero, 0       # t2 = counter for the number of digits
+
 length_check:
-    lb t3, 0(t1)        # Load each byte from input_buffer
-    li t4, 10           # ASCII value for newline
+    lb t3, 0(t1)           # Load each byte from input_buffer
+    addi t4, zero, 10      # t4 = ASCII value for newline
     beq t3, t4, length_done # If newline, end the check
-    beqz t3, length_done # If null terminator, end the check
-    addi t2, t2, 1      # Increment counter
-    addi t1, t1, 1      # Move to next byte
+    beqz t3, length_done   # If null terminator, end the check
+    addi t2, t2, 1         # Increment counter
+    addi t1, t1, 1         # Move to next byte
     j length_check
 
 length_done:
     bne t2, t0, format_incorrect # If not exactly 9 digits, jump to format error
 
-
-        # Initialize variables for checksum calculation
+    # Initialize variables for checksum calculation
     la t1, input_buffer  # Pointer to input_buffer
     la t2, weights       # Pointer to weights
-    li t3, 0             # t3 will store the checksum sum
-    li t4, 0             # Index for digits (0-8)
-    li t6, 9             # Upper bound for loop (process 9 digits)
+    addi t3, zero, 0     # t3 will store the checksum sum
+    addi t4, zero, 0     # Index for digits (0-8)
+    addi t6, zero, 9     # Upper bound for loop (process 9 digits)
 
 checksum_loop:
     lb t5, 0(t1)         # Load the digit as ASCII
-    li t0, 10            # ASCII value for newline
+    addi t0, zero, 10    # ASCII value for newline
     beq t5, t0, check_done  # Stop at newline
     beq t4, t6, check_done  # Stop after processing 9 digits
     addi t5, t5, -48     # Convert ASCII to integer (subtract '0')
@@ -64,29 +64,31 @@ checksum_loop:
 
 check_done:
     # Check if the sum is divisible by 11
-    li t0, 11            # Divisor
-    rem t1, t3, t0       # t1 = t3 % 11
-    beqz t1, valid_tfn   # If remainder is 0, the TFN is valid
+    addi t0, zero, 11        # Divisor
+    rem t1, t3, t0           # t1 = t3 % 11
+    beqz t1, valid_tfn       # If remainder is 0, the TFN is valid
 
-    # If invalid
+    # If invalid, jump to invalid_tfn
+    j invalid_tfn
+
 invalid_tfn:
-    la a0, invalid_msg
-    li a7, 4           # syscall to print string
+    la a0, invalid_msg       # Load invalid TFN message
+    addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end              # Jump to the end
+    j end                    # Jump to end
 
 valid_tfn:
-    la a0, valid_msg
-    li a7, 4           # syscall to print string
+    la a0, valid_msg         # Load valid TFN message
+    addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end
+    j end                    # Jump to end
 
 format_incorrect:
-    la a0, format_error
-    li a7, 4           # syscall to print string
+    la a0, format_error      # Load format error message
+    addi a7, zero, 4         # Syscall for print string (syscall 4)
     ecall
-    j end
+    j end                    # Jump to end
 
 end:
-    li a7, 10          # Exit syscall
+    addi a7, zero, 10        # Syscall for exit (syscall 10)
     ecall
