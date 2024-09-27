@@ -1,8 +1,8 @@
 .data
-    tfn_prompt:    .asciz "Enter the TFN to check: "  # Removed newline
-    valid_msg:     .asciz "Hooray! The TFN is valid!\n\0"
-    invalid_msg:   .asciz "Invalid TFN: Checksum Failed\n\0"
-    format_error:  .asciz "Invalid TFN: Format Incorrect\n\0"
+    tfn_prompt:    .asciz "Enter the TFN to check: "  # No newline
+    valid_msg:     .asciz "Hooray! The TFN is valid!"  # Removed newline at the end
+    invalid_msg:   .asciz "Invalid TFN: Checksum Failed"  # Removed newline at the end
+    format_error:  .asciz "Invalid TFN: Format Incorrect"  # Removed newline at the end
     
     input_buffer:  .space 12   # To store up to 9 digits + newline + null terminator
     weights:       .word 1, 4, 3, 7, 5, 8, 6, 9, 10  # Weights for each TFN digit
