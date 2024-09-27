@@ -9,31 +9,43 @@
 
 .text
     .globl main
+    
+    
+.macro print_string(%reg) # print string register
+addi a7, zero, 4
+add a0, zero, %reg
+ecall
+.end_macro
+
+.macro print_stringl(%label) # print string from label
+addi a7, zero, 4
+la a0, %label
+ecall
+.end_macro
+
 main:
     # Prompt user for input
-    la a0, tfn_prompt      # Load the prompt message
-    addi a7, zero, 4       # Syscall for print string (syscall 4)
-    ecall
+    print_stringl(tfn_prompt)  # Using macro to print the prompt
 
     # Get input from the user
-    la a0, input_buffer    # Store input in input_buffer
-    addi a1, zero, 12      # Buffer size to capture input (12 bytes)
-    addi a7, zero, 8       # Syscall to read string (syscall 8)
+    la a0, input_buffer        # Store input in input_buffer
+    addi a1, zero, 12          # Buffer size to capture input (12 bytes)
+    addi a7, zero, 8           # Syscall to read string (syscall 8)
     ecall
 
     # Check if the input is exactly 9 digits (excluding newline)
-    addi t0, zero, 9       # t0 = expected length (9 digits)
-    la t1, input_buffer    # Point t1 to input_buffer
-    addi t2, zero, 0       # t2 = counter for the number of digits
+    addi t0, zero, 9           # t0 = expected length (9 digits)
+    la t1, input_buffer        # Point t1 to input_buffer
+    addi t2, zero, 0           # t2 = counter for the number of digits
 
 length_check:
-    lb t3, 0(t1)           # Load each byte from input_buffer
-    addi t4, zero, 10      # t4 = ASCII value for newline
-    beq t3, t4, length_done # If newline, end the check
-    beqz t3, length_done   # If null terminator, end the check
-    addi t2, t2, 1         # Increment counter
-    addi t1, t1, 1         # Move to next byte
-    b length_check         # Continue checking length
+    lb t3, 0(t1)               # Load each byte from input_buffer
+    addi t4, zero, 10          # t4 = ASCII value for newline
+    beq t3, t4, length_done    # If newline, end the check
+    beqz t3, length_done       # If null terminator, end the check
+    addi t2, t2, 1             # Increment counter
+    addi t1, t1, 1             # Move to next byte
+    blt t2, t0, length_check   # Loop until we've read all digits
 
 length_done:
     bne t2, t0, format_incorrect # If not exactly 9 digits, jump to format error
@@ -60,7 +72,7 @@ checksum_loop:
     addi t1, t1, 1       # Move to next digit in input_buffer
     addi t2, t2, 4       # Move to next weight
     addi t4, t4, 1       # Increment index
-    b checksum_loop      # Repeat for all 9 digits
+    blt t4, t6, checksum_loop   # Repeat for all 9 digits
 
 check_done:
     # Check if the sum is divisible by 11
@@ -68,26 +80,19 @@ check_done:
     rem t1, t3, t0           # t1 = t3 % 11
     beqz t1, valid_tfn       # If remainder is 0, the TFN is valid
 
-    # If invalid, branch to invalid_tfn
+    # If invalid, jump to invalid_tfn
     b invalid_tfn
 
-invalid_tfn:
-    la a0, invalid_msg       # Load invalid TFN message
-    addi a7, zero, 4         # Syscall for print string (syscall 4)
-    ecall
-    b end                    # Branch to end
-
 valid_tfn:
-    la a0, valid_msg         # Load valid TFN message
-    addi a7, zero, 4         # Syscall for print string (syscall 4)
-    ecall
-    b end                    # Branch to end
+    print_stringl(valid_msg)  # Using macro to print valid TFN message
+    b end
+
+invalid_tfn:
+    print_stringl(invalid_msg)  # Using macro to print invalid TFN message
+    b end
 
 format_incorrect:
-    la a0, format_error      # Load format error message
-    addi a7, zero, 4         # Syscall for print string (syscall 4)
-    ecall
-    b end                    # Branch to end
+    print_stringl(format_error)  # Using macro to print format error message
 
 end:
     addi a7, zero, 10        # Syscall for exit (syscall 10)
