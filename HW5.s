@@ -1,5 +1,5 @@
 .data
-    tfn_prompt:    .asciz "Enter the TFN to check: \0"
+    tfn_prompt:    .asciz "Enter the TFN to check: "  # Removed newline
     valid_msg:     .asciz "Hooray! The TFN is valid!\n\0"
     invalid_msg:   .asciz "Invalid TFN: Checksum Failed\n\0"
     format_error:  .asciz "Invalid TFN: Format Incorrect\n\0"
@@ -33,7 +33,7 @@ length_check:
     beqz t3, length_done   # If null terminator, end the check
     addi t2, t2, 1         # Increment counter
     addi t1, t1, 1         # Move to next byte
-    b length_check
+    b length_check         # Continue checking length
 
 length_done:
     bne t2, t0, format_incorrect # If not exactly 9 digits, jump to format error
@@ -67,7 +67,9 @@ check_done:
     addi t0, zero, 11        # Divisor
     rem t1, t3, t0           # t1 = t3 % 11
     beqz t1, valid_tfn       # If remainder is 0, the TFN is valid
-    b invalid_tfn            # Branch to invalid_tfn if invalid
+
+    # If invalid, branch to invalid_tfn
+    b invalid_tfn
 
 invalid_tfn:
     la a0, invalid_msg       # Load invalid TFN message
