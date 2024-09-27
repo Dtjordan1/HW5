@@ -33,7 +33,7 @@ length_check:
     beqz t3, length_done   # If null terminator, end the check
     addi t2, t2, 1         # Increment counter
     addi t1, t1, 1         # Move to next byte
-    j length_check
+    b length_check
 
 length_done:
     bne t2, t0, format_incorrect # If not exactly 9 digits, jump to format error
