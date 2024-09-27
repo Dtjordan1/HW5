@@ -43,7 +43,7 @@ length_check:
     addi t5, zero, 48          # ASCII value for '0'
     addi t6, zero, 57          # ASCII value for '9'
     blt t3, t5, format_incorrect # If below '0', invalid format
-    bge t3, t6, format_incorrect # If above '9', invalid format
+    bgt t3, t6, format_incorrect # If above '9', invalid format
 
     addi t2, t2, 1             # Increment digit counter
     addi t1, t1, 1             # Move to next byte
